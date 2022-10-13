@@ -92,33 +92,25 @@ class Player(pygame.sprite.Sprite):
             self.image = self.walk_down_sprites[int(self.current_sprite) % len(self.walk_down_sprites)]
 
     def move(self):
+        prev_x, prev_y = self.rect.x, self.rect.y
         keys = pygame.key.get_pressed()
         if keys:
             self.is_moving = True
             if keys[pygame.K_LEFT]:
+                self.rect.x -= PLAYER_SPEED
                 self.animate_left()
-                if collision:
-                    self.rect.x += 2 * PLAYER_SPEED
-                else:
-                    self.rect.x -= PLAYER_SPEED
-            elif keys[pygame.K_RIGHT]:
+            if keys[pygame.K_RIGHT]:
+                self.rect.x += PLAYER_SPEED
                 self.animate_right()
-                if collision:
-                    self.rect.x -= 2 * PLAYER_SPEED
-                else:
-                    self.rect.x += PLAYER_SPEED
-            elif keys[pygame.K_UP]:
+            if keys[pygame.K_UP]:
+                self.rect.y -= PLAYER_SPEED
                 self.animate_up()
-                if collision:
-                    self.rect.y += 2 * PLAYER_SPEED
-                else:
-                    self.rect.y -= PLAYER_SPEED
-            elif keys[pygame.K_DOWN]:
+            if keys[pygame.K_DOWN]:
+                self.rect.y += PLAYER_SPEED
                 self.animate_down()
-                if collision:
-                    self.rect.y -= 2 * PLAYER_SPEED
-                else:
-                    self.rect.y += PLAYER_SPEED
+
+        if check_collision(self, collidable_tiles):
+            self.rect.x, self.rect.y = prev_x, prev_y
         self.is_moving = False
 
     def update(self):
@@ -152,7 +144,6 @@ while True:
 
     screen.fill((0, 0, 0))
     display_level(tmx_data)
-    collision = check_collision(player.sprite, collidable_tiles)
     player.draw(screen)
     player.update()
     pygame.display.update()
