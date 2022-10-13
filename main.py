@@ -97,21 +97,32 @@ class Player(pygame.sprite.Sprite):
             self.is_moving = True
             if keys[pygame.K_LEFT]:
                 self.animate_left()
-                self.rect.x -= PLAYER_SPEED
-            if keys[pygame.K_RIGHT]:
+                if collision:
+                    self.rect.x += 2 * PLAYER_SPEED
+                else:
+                    self.rect.x -= PLAYER_SPEED
+            elif keys[pygame.K_RIGHT]:
                 self.animate_right()
-                self.rect.x += PLAYER_SPEED
-            if keys[pygame.K_UP]:
+                if collision:
+                    self.rect.x -= 2 * PLAYER_SPEED
+                else:
+                    self.rect.x += PLAYER_SPEED
+            elif keys[pygame.K_UP]:
                 self.animate_up()
-                self.rect.y -= PLAYER_SPEED
-            if keys[pygame.K_DOWN]:
+                if collision:
+                    self.rect.y += 2 * PLAYER_SPEED
+                else:
+                    self.rect.y -= PLAYER_SPEED
+            elif keys[pygame.K_DOWN]:
                 self.animate_down()
-                self.rect.y += PLAYER_SPEED
+                if collision:
+                    self.rect.y -= 2 * PLAYER_SPEED
+                else:
+                    self.rect.y += PLAYER_SPEED
         self.is_moving = False
 
     def update(self):
-        if not collision:
-            self.move()
+        self.move()
 
 
 def display_level(tmx_data):
