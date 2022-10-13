@@ -10,6 +10,15 @@ pygame.display.set_caption(SCREEN_TITLE)
 tmx_data = load_pygame('Tiled/data/Maze.tmx')
 clock = pygame.time.Clock()
 
+# assign a rectangle to tiles that are collidable
+def get_collidable_tiles(tmx_data):
+    collidable_tiles = []
+    layer = tmx_data.get_layer_by_name('walls')
+    for x, y, gid in layer:
+        tile = tmx_data.get_tile_image_by_gid(gid)
+        if tile:
+            collidable_tiles.append(pygame.Rect(x * tmx_data.tilewidth, y * tmx_data.tileheight, tmx_data.tilewidth, tmx_data.tileheight))
+    return collidable_tiles
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
@@ -101,7 +110,8 @@ class Player(pygame.sprite.Sprite):
         self.is_moving = False
 
     def update(self):
-        self.move()
+        if not collision:
+            self.move()
 
 
 def display_level(tmx_data):
@@ -112,9 +122,16 @@ def display_level(tmx_data):
                 if tile:
                     screen.blit(tile, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
 
+def check_collision(sprite, walls):
+    for wall in walls:
+        if sprite.rect.colliderect(wall):
+            return True
 
 player = pygame.sprite.GroupSingle()
 player.add(Player(300, 300))
+
+collidable_tiles = get_collidable_tiles(tmx_data)
+collision = False
 
 while True:
     for event in pygame.event.get():
@@ -124,7 +141,10 @@ while True:
 
     screen.fill((0, 0, 0))
     display_level(tmx_data)
+    collision = check_collision(player.sprite, collidable_tiles)
     player.draw(screen)
     player.update()
     pygame.display.update()
     clock.tick(60)
+
+# TODO: fix player movement upper collision
