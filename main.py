@@ -7,11 +7,104 @@ from pytmx.util_pygame import load_pygame
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption(SCREEN_TITLE)
-tmx_data = load_pygame("Tiled/data/basic.tmx")
-print(tmx_data.tilewidth, tmx_data.tileheight)
+tmx_data = load_pygame('Tiled/data/Maze.tmx')
+clock = pygame.time.Clock()
 
 
-def dispplay_level(tmx_data):
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__()
+        self.walk_right_sprites = []
+        self.walk_left_sprites = []
+        self.walk_up_sprites = []
+        self.walk_down_sprites = []
+        self.load_sprites()
+
+        self.current_sprite = 0
+        self.image = self.walk_right_sprites[self.current_sprite]
+
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
+
+        self.is_moving = False
+
+    def load_sprites(self):
+        for j in range(4):
+            img = pygame.image.load(
+                f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{j}.png').convert_alpha()
+            img = pygame.transform.rotozoom(img, 0, 3)
+            self.walk_right_sprites.append(img)
+        for j in range(4, 8):
+            img = pygame.image.load(
+                f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{j}.png').convert_alpha()
+            img = pygame.transform.rotozoom(img, 0, 3)
+            self.walk_left_sprites.append(img)
+        for j in range(8, 12):
+            img = pygame.image.load(
+                f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{j}.png').convert_alpha()
+            img = pygame.transform.rotozoom(img, 0, 3)
+            self.walk_up_sprites.append(img)
+        img = pygame.image.load(
+            f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{1}.png').convert_alpha()
+        img = pygame.transform.rotozoom(img, 0, 3)
+        self.walk_down_sprites.append(img)
+        img = pygame.image.load(
+            f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{3}.png').convert_alpha()
+        img = pygame.transform.rotozoom(img, 0, 3)
+        self.walk_down_sprites.append(img)
+        img = pygame.image.load(
+            f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{5}.png').convert_alpha()
+        img = pygame.transform.rotozoom(img, 0, 3)
+        self.walk_down_sprites.append(img)
+
+        img = pygame.image.load(
+            f'Minifantasy_CreaturesHumanBaseWalk/Minifantasy_CreaturesHumanBaseWalk_{7}.png').convert_alpha()
+        img = pygame.transform.rotozoom(img, 0, 3)
+        self.walk_down_sprites.append(img)
+
+    def animate_right(self):
+        if self.is_moving:
+            self.current_sprite += ANIMATION_SPEED
+            self.image = self.walk_right_sprites[int(self.current_sprite) % len(self.walk_right_sprites)]
+
+    def animate_left(self):
+        if self.is_moving:
+            self.current_sprite += ANIMATION_SPEED
+            self.image = self.walk_left_sprites[int(self.current_sprite) % len(self.walk_left_sprites)]
+
+    def animate_up(self):
+        if self.is_moving:
+            self.current_sprite += ANIMATION_SPEED
+            self.image = self.walk_up_sprites[int(self.current_sprite) % len(self.walk_up_sprites)]
+
+    def animate_down(self):
+        if self.is_moving:
+            self.current_sprite += ANIMATION_SPEED
+            self.image = self.walk_down_sprites[int(self.current_sprite) % len(self.walk_down_sprites)]
+
+    def move(self):
+        keys = pygame.key.get_pressed()
+        if keys:
+            self.is_moving = True
+            if keys[pygame.K_LEFT]:
+                self.animate_left()
+                self.rect.x -= PLAYER_SPEED
+            if keys[pygame.K_RIGHT]:
+                self.animate_right()
+                self.rect.x += PLAYER_SPEED
+            if keys[pygame.K_UP]:
+                self.animate_up()
+                self.rect.y -= PLAYER_SPEED
+            if keys[pygame.K_DOWN]:
+                self.animate_down()
+                self.rect.y += PLAYER_SPEED
+        self.is_moving = False
+
+    def update(self):
+        self.move()
+
+
+def display_level(tmx_data):
     for layer in tmx_data.visible_layers:
         if isinstance(layer, pytmx.TiledTileLayer):
             for x, y, gid in layer:
@@ -20,10 +113,18 @@ def dispplay_level(tmx_data):
                     screen.blit(tile, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
 
 
+player = pygame.sprite.GroupSingle()
+player.add(Player(300, 300))
+
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-    dispplay_level(tmx_data)
+
+    screen.fill((0, 0, 0))
+    display_level(tmx_data)
+    player.draw(screen)
+    player.update()
     pygame.display.update()
+    clock.tick(60)

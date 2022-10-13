@@ -1,5 +1,15 @@
 
 # screen
-SCREEN_WIDTH = 900
-SCREEN_HEIGHT = 900
+SCREEN_WIDTH = 400
+SCREEN_HEIGHT = 400
+
+# tiles
+TILE_SIZE = 8
+PLAYER_SIZE = 8
+
+# title
 SCREEN_TITLE = "Maze"
+
+# player settings
+PLAYER_SPEED = 3
+ANIMATION_SPEED = 0.1
